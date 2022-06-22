@@ -4,7 +4,7 @@ from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 import boto3
-import psycopg2
+# import psycopg2
 
 app = FastAPI(debug=True)
 app.add_middleware(
@@ -27,13 +27,13 @@ class PhotoModel(BaseModel):
 
 @app.get("/photos", response_model=List[PhotoModel])
 async def get_all_photos():
-    # Connect to our database
-    conn = psycopg2.connect(
-        database="irodb", user="docker", password="docker", host="0.0.0.0"
-    )
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM photo ORDER BY id DESC")
-    rows = cur.fetchall()
+    # # Connect to our database
+    # conn = psycopg2.connect(
+    #     database="irodb", user="docker", password="docker", host="0.0.0.0"
+    # )
+    # cur = conn.cursor()
+    # cur.execute("SELECT * FROM photo ORDER BY id DESC")
+    # rows = cur.fetchall()
 
     formatted_photos = []
     for row in rows:
@@ -62,17 +62,17 @@ async def add_photo(file: UploadFile):
 
     uploaded_file_url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{file.filename}"
 
-    # Store URL in database
-    conn = psycopg2.connect(
-        database="irodb", user="docker", password="docker", host="0.0.0.0"
-    )
-    cur = conn.cursor()
-    cur.execute(
-        f"INSERT INTO photo (photo_name, photo_url) VALUES ('{file.filename}', '{uploaded_file_url}' )"
-    )
-    conn.commit()
-    cur.close()
-    conn.close()
+    # # Store URL in database
+    # conn = psycopg2.connect(
+    #     database="irodb", user="docker", password="docker", host="0.0.0.0"
+    # )
+    # cur = conn.cursor()
+    # cur.execute(
+    #     f"INSERT INTO photo (photo_name, photo_url) VALUES ('{file.filename}', '{uploaded_file_url}' )"
+    # )
+    # conn.commit()
+    # cur.close()
+    # conn.close()
 
 
 @app.get("/test")
