@@ -78,3 +78,8 @@ async def add_photo(file: UploadFile):
 @app.get("/test")
 async def root():
     return {"message": "Hello, world!"}
+
+
+@app.post("/uploadfile")
+async def create_uploadfile(file: UploadFile):
+    return {"filename": file.filename}
