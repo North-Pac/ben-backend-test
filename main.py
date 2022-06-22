@@ -34,7 +34,7 @@ async def get_all_photos():
     # cur = conn.cursor()
     # cur.execute("SELECT * FROM photo ORDER BY id DESC")
     # rows = cur.fetchall()
-
+    print(s3) 
     formatted_photos = []
     for row in rows:
         formatted_photos.append(
@@ -43,8 +43,8 @@ async def get_all_photos():
             )
         )
 
-    cur.close()
-    conn.close()
+    # cur.close()
+    # conn.close()
     return formatted_photos
 
 
