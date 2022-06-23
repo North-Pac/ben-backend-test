@@ -1,9 +1,10 @@
 import numpy as np
 import cv2
 from cv2 import dnn
+import time
 
 
-def colorizer(image_path: str):
+def Colorizer(image_path: str):
     """
     colorizer function takes in a b&w image and returns colorized version
     arg: image_path: directory path to image to colorize    
@@ -72,12 +73,5 @@ def colorizer(image_path: str):
     # result = cv2.hconcat([img, colorized])
     result = colorized
 
+    cv2.imwrite(f"/tmp/colorized/${time.time()}.jpg", result)
     return result
-
-    # cv2.imshow("Grayscale -> Colour", result)
-
-    # cv2.waitKey(0)
-
-
-if __name__ == "__main__":
-    colorizer('Imgs/bikeness.jpeg')
