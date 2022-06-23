@@ -1,3 +1,4 @@
+from os import PRIO_USER
 from urllib import response
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -33,25 +34,29 @@ class PhotoModel(BaseModel):
     photo_url: str
 
 
-@app.get("/photos", response_model=List[PhotoModel])
-async def get_all_photos():
-    
-    print(s3) 
-    formatted_photos = []
-    for row in rows:
-        formatted_photos.append(
-            PhotoModel(
-                id=row[0], photo_name=row[1], photo_url=row[2]
-            )
-        )
+colorized_url_set = []
 
-    return formatted_photos
+
+@app.get('/getcolorized')
+async def getcolorized():
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(S3_BUCKET_NAME)
+    for colorized in bucket.objects.filter(Prefix='colorized/'):
+        print(colorized.key)
+        colorized_url = f"https://{S3_BUCKET_NAME}.s3.us-west-1.amazonaws.com/{colorized.key}"
+        colorized_url_set.append(colorized_url)
+    return {'colorized_set': set(colorized_url_set)}
+
+
+@app.get("/gallery")  # , response_model=List[PhotoModel]
+async def get_all_photos():
+    return {'colorized_set': set(colorized_url_set)}
 
 
 @app.post("/photos", status_code=201)
 async def add_photo(file: UploadFile):
     print(f"Received: {file.filename}")
-        
+
     # Upload file to AWS S3
     s3 = boto3.resource("s3")
     bucket = s3.Bucket(S3_BUCKET_NAME)
@@ -61,18 +66,16 @@ async def add_photo(file: UploadFile):
     uploaded_file_url = f"https://{S3_BUCKET_NAME}.s3.us-west-1.amazonaws.com/{file.filename}"
     urllib.request.urlretrieve(uploaded_file_url, f"images/{file.filename}")
 
+    colorized_url = f"https://{S3_BUCKET_NAME}.s3.us-west-1.amazonaws.com/colorized/{file.filename}"
     _, tmpname = Colorizer(f"images/{file.filename}")
     print("Uploading tmp image to bucket")
     bucket.upload_file(tmpname, f"colorized/{file.filename}",
-                        ExtraArgs={"ACL": "public-read"})
+                       ExtraArgs={"ACL": "public-read"})
+    colorized_url_set.append(colorized_url)
     print("Success!")
+    return {'colorized_upload': colorized_url}
 
-    
+
 @app.get("/test")
 async def root():
     return {"message": "Hello, world!"}
-
-
-@app.post("/uploadfile")
-async def create_uploadfile(file: UploadFile):
-    return {"filename": file.filename}
