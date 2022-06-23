@@ -1,3 +1,4 @@
+import pathlib
 import numpy as np
 import cv2
 from cv2 import dnn
@@ -9,6 +10,7 @@ def Colorizer(image_path: str):
     colorizer function takes in a b&w image and returns colorized version
     arg: image_path: directory path to image to colorize    
     """
+    print(f"Colorizing {image_path}")
 
     # Model file paths
     proto_file = 'Models/colorization_deploy_v2.prototxt'
@@ -70,8 +72,13 @@ def Colorizer(image_path: str):
     img = cv2.resize(img, (width, height))
     colorized = cv2.resize(colorized, (width, height))
 
+    print("  Colorizing complete")
+
     # result = cv2.hconcat([img, colorized])
     result = colorized
 
-    cv2.imwrite(f"/tmp/colorized/${time.time()}.jpg", result)
-    return result
+    print("  Writing temporary image")
+    pathlib.Path("/tmp/colorized/").mkdir(parents=True, exist_ok=True)
+    tmpname = f"/tmp/colorized/{time.time()}.jpg"
+    cv2.imwrite(tmpname, result)
+    return result, tmpname

@@ -24,3 +24,6 @@ toml==0.10.2
 typing_extensions==4.2.0
 urllib3==1.26.9
 uvicorn==0.17.6
+pillow
+requests
+certifi

@@ -50,12 +50,7 @@ async def get_all_photos():
 
 @app.post("/photos", status_code=201)
 async def add_photo(file: UploadFile):
-    print("Endpoint hit!!")
-    print(file.filename)
-    print(file.content_type)
-    print(type(file.file))
-    print(type(file.filename))
-
+    print(f"Received: {file.filename}")
         
     # Upload file to AWS S3
     s3 = boto3.resource("s3")
@@ -65,17 +60,14 @@ async def add_photo(file: UploadFile):
 
     uploaded_file_url = f"https://{S3_BUCKET_NAME}.s3.us-west-1.amazonaws.com/{file.filename}"
     urllib.request.urlretrieve(uploaded_file_url, f"images/{file.filename}")
-    
 
-    colorized = Colorizer(f"images/{file.filename}")
-    colorized_image = Image.fromarray(colorized)
-    print(type(colorized_image))
-    bucket.upload_fileobj(colorized_image, file.filename,
-                          ExtraArgs={"ACL": "public-read"})
-
+    _, tmpname = Colorizer(f"images/{file.filename}")
+    print("Uploading tmp image to bucket")
+    bucket.upload_file(tmpname, f"colorized/{file.filename}",
+                        ExtraArgs={"ACL": "public-read"})
+    print("Success!")
 
     
-
 @app.get("/test")
 async def root():
     return {"message": "Hello, world!"}
