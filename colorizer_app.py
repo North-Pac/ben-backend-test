@@ -35,7 +35,7 @@ def Colorizer(image_path: str):
     net.getLayer(conv8).blobs = [np.full([1, 313], 2.606, dtype="float32")]
 
     # resizing the image
-    scale_percent = 50  # percentage of original image size. A value of 100 here means the output will match the original size
+    scale_percent = 100  # percentage of original image size. A value of 100 here means the output will match the original size
     width = int(lab_img.shape[1] * scale_percent / 100)
     height = int(lab_img.shape[0] * scale_percent / 100)
     dim = (width, height)

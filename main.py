@@ -1,3 +1,4 @@
+from os import PRIO_USER
 from urllib import response
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -32,26 +33,29 @@ class PhotoModel(BaseModel):
     photo_name: str
     photo_url: str
 
+colorized_url_list = []
 
-@app.get("/photos", response_model=List[PhotoModel])
-async def get_all_photos():
+
+@app.get('/getcolorized/')
+async def getcolorized():
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(S3_BUCKET_NAME)
+    for colorized in bucket.filter(Prefix='colorized/').objects.all():
+        print(colorized.key)
     
-    print(s3) 
-    formatted_photos = []
-    for row in rows:
-        formatted_photos.append(
-            PhotoModel(
-                id=row[0], photo_name=row[1], photo_url=row[2]
-            )
-        )
 
-    return formatted_photos
+
+@app.get("/photos") #, response_model=List[PhotoModel]
+async def get_all_photos():
+    return colorized_url_list
 
 
 @app.post("/photos", status_code=201)
 async def add_photo(file: UploadFile):
     print(f"Received: {file.filename}")
-        
+
+
+
     # Upload file to AWS S3
     s3 = boto3.resource("s3")
     bucket = s3.Bucket(S3_BUCKET_NAME)
@@ -64,15 +68,13 @@ async def add_photo(file: UploadFile):
     _, tmpname = Colorizer(f"images/{file.filename}")
     print("Uploading tmp image to bucket")
     bucket.upload_file(tmpname, f"colorized/{file.filename}",
-                        ExtraArgs={"ACL": "public-read"})
+                       ExtraArgs={"ACL": "public-read"})
+    colorized_url_list.append(uploaded_file_url)
     print("Success!")
 
-    
+
 @app.get("/test")
 async def root():
     return {"message": "Hello, world!"}
 
 
-@app.post("/uploadfile")
-async def create_uploadfile(file: UploadFile):
-    return {"filename": file.filename}
