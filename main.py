@@ -33,28 +33,29 @@ class PhotoModel(BaseModel):
     photo_name: str
     photo_url: str
 
-colorized_url_list = []
+
+colorized_url_set = []
 
 
-@app.get('/getcolorized/')
+@app.get('/getcolorized')
 async def getcolorized():
     s3 = boto3.resource("s3")
     bucket = s3.Bucket(S3_BUCKET_NAME)
-    for colorized in bucket.filter(Prefix='colorized/').objects.all():
+    for colorized in bucket.objects.filter(Prefix='colorized/'):
         print(colorized.key)
-    
+        colorized_url = f"https://{S3_BUCKET_NAME}.s3.us-west-1.amazonaws.com/{colorized.key}"
+        colorized_url_set.append(colorized_url)
+    return {'colorized_set': set(colorized_url_set)}
 
 
-@app.get("/photos") #, response_model=List[PhotoModel]
+@app.get("/photos")  # , response_model=List[PhotoModel]
 async def get_all_photos():
-    return colorized_url_list
+    return {'colorized_set': set(colorized_url_set)}
 
 
 @app.post("/photos", status_code=201)
 async def add_photo(file: UploadFile):
     print(f"Received: {file.filename}")
-
-
 
     # Upload file to AWS S3
     s3 = boto3.resource("s3")
@@ -65,16 +66,16 @@ async def add_photo(file: UploadFile):
     uploaded_file_url = f"https://{S3_BUCKET_NAME}.s3.us-west-1.amazonaws.com/{file.filename}"
     urllib.request.urlretrieve(uploaded_file_url, f"images/{file.filename}")
 
+    colorized_url = f"https://{S3_BUCKET_NAME}.s3.us-west-1.amazonaws.com/colorized/{file.filename}"
     _, tmpname = Colorizer(f"images/{file.filename}")
     print("Uploading tmp image to bucket")
     bucket.upload_file(tmpname, f"colorized/{file.filename}",
                        ExtraArgs={"ACL": "public-read"})
-    colorized_url_list.append(uploaded_file_url)
+    colorized_url_set.append(colorized_url)
     print("Success!")
+    return {'colorized_upload': colorized_url}
 
 
 @app.get("/test")
 async def root():
     return {"message": "Hello, world!"}
-
-
