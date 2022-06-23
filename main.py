@@ -48,7 +48,7 @@ async def getcolorized():
     return {'colorized_set': set(colorized_url_set)}
 
 
-@app.get("/photos")  # , response_model=List[PhotoModel]
+@app.get("/gallery")  # , response_model=List[PhotoModel]
 async def get_all_photos():
     return {'colorized_set': set(colorized_url_set)}
 
