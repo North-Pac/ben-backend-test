@@ -4,6 +4,10 @@ import cv2
 from cv2 import dnn
 import time
 
+proto_file = 'Models/colorization_deploy_v2.prototxt'
+model_file = 'Models/colorization_release_v2.caffemodel'
+hull_pts = 'Models/pts_in_hull.npy'
+
 
 def Colorizer(image_path: str):
     """
@@ -12,18 +16,12 @@ def Colorizer(image_path: str):
     """
     print(f"Colorizing {image_path}")
 
-    # Model file paths
-    proto_file = 'Models/colorization_deploy_v2.prototxt'
-    model_file = 'Models/colorization_release_v2.caffemodel'
-    hull_pts = 'Models/pts_in_hull.npy'
-    img_path = image_path
-
     # model params
     net = dnn.readNetFromCaffe(proto_file, model_file)
     kernel = np.load(hull_pts)
 
     # reading and processing image
-    img = cv2.imread(img_path)
+    img = cv2.imread(image_path)
     scaled = img.astype("float32") / 255.0
     lab_img = cv2.cvtColor(scaled, cv2.COLOR_BGR2LAB)
 
@@ -35,13 +33,14 @@ def Colorizer(image_path: str):
     net.getLayer(conv8).blobs = [np.full([1, 313], 2.606, dtype="float32")]
 
     # resizing the image
-    scale_percent = 100  # percentage of original image size. A value of 100 here means the output will match the original size
+    # percentage of original image size. A value of 100 here means the output will match the original size
+    scale_percent = 100
     width = int(lab_img.shape[1] * scale_percent / 100)
     height = int(lab_img.shape[0] * scale_percent / 100)
     dim = (width, height)
 
     # cv2.resize(src: the image, dsize: desired output size)
-    resized = cv2.resize(lab_img, dim)
+    # resized = cv2.resize(lab_img, dim)
     # split the L channel, L channel is the light intensity channel within CV2, The split method allows us to separate
     # this channel from the color channels associated with the image
     L = cv2.split(lab_img)[0]
