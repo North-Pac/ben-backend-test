@@ -1,6 +1,6 @@
 # Backend Iro Iro
 
-Please see the Readme for Iro Iro for detailed instructions on how to run this app using AWS s3 storage implementation. See this [README](https://github.com/rsw359/Iro-Iro/blob/staging/README.md)
+For detailed instructions on how to Iro Iro using AWS s3 storage implementation. See this [README](https://github.com/rsw359/Iro-Iro/blob/staging/README.md)
 
 Download the Caffe Model from [https://drive.google.com/drive/folders/1FaDajjtAsntF_Sw5gqF0WyakviA5l8-a] Place files for the caffe model in the models directory.
 
